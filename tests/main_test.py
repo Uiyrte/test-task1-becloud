@@ -1,7 +1,9 @@
-import pytest
-from main import USERS_DB
-from main import calculate_order_total
 from datetime import datetime
+
+import pytest
+
+from src.order_calculator import calculate_order_total
+from src.users_repository import USERS_DB
 
 
 def make_fake_date(month):
@@ -357,7 +359,7 @@ def test_more_equal_3_years(user_id, items, discount_code, result):
 def test_code_new_year(
     monkeypatch, user_id, items, discount_code, result, month
 ):
-    monkeypatch.setattr("main.datetime.datetime", make_fake_date(month))
+    monkeypatch.setattr("src.code_sale.datetime.datetime", make_fake_date(month))
     assert calculate_order_total(user_id, items, discount_code) == result
 
 
@@ -443,7 +445,7 @@ def test_negative_total(user_id, items, discount_code):
 def test_negative_total_after_newyear_discount(
     monkeypatch, user_id, items, discount_code, month
 ):
-    monkeypatch.setattr("main.datetime.datetime", make_fake_date(month))
+    monkeypatch.setattr("src.code_sale.datetime.datetime", make_fake_date(month))
     assert calculate_order_total(user_id, items, discount_code) == 0
 
 
@@ -624,7 +626,7 @@ def test_diff_sale(user_id, items, discount_code, result):
 def test_diff_sale_new_year(
     monkeypatch, user_id, items, discount_code, result, month
 ):
-    monkeypatch.setattr("main.datetime.datetime", make_fake_date(month))
+    monkeypatch.setattr("src.code_sale.datetime.datetime", make_fake_date(month))
     assert calculate_order_total(user_id, items, discount_code) == result
 
 
@@ -666,7 +668,7 @@ def test_summer_discount_applied_once_per_order(
 def test_newyear_discount_applied_once_per_order(
     monkeypatch, user_id, items, discount_code, result, month
 ):
-    monkeypatch.setattr("main.datetime.datetime", make_fake_date(month))
+    monkeypatch.setattr("src.code_sale.datetime.datetime", make_fake_date(month))
     assert calculate_order_total(user_id, items, discount_code) == result
 
 
