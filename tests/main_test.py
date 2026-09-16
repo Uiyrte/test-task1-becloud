@@ -556,3 +556,32 @@ def test_zero_price_or_qty_items_do_not_contribute(
     user_id, items, discount_code, result
 ):
     assert calculate_order_total(user_id, items, discount_code) == result
+
+
+@pytest.mark.parametrize(
+    ["user_id", "items", "result"],
+    [
+        [2, [Item(id=1, price=1500, category="base", qty=1)], 1800],
+        [2, [Item(id=1, price=2000, category="base", qty=1)], 2300],
+        [2, [Item(id=1, price=2500, category="base", qty=1)], 2500],
+    ],
+)
+def test_free_delivery_code(user_id, items, result):
+    assert calculate_order_total(user_id, items, "FREEDELIVERY") == result
+
+
+def test_delivery_code_applied_after_percent_code():
+    user_id = 2
+    items = [Item(id=1, price=2000, category="base", qty=1)]
+    result = calculate_order_total(user_id, items, "SUMMER", "FREEDELIVERY")
+    assert result == 2000.0
+
+
+def test_delivery_code_applied_after_fixed_and_percent_codes(monkeypatch):
+    monkeypatch.setattr("src.code_sale.datetime.datetime", make_fake_date(12))
+    user_id = 2
+    items = [Item(id=1, price=3000, category="base", qty=1)]
+    result = calculate_order_total(
+        user_id, items, "NEWYEAR2025", "SUMMER", "FREEDELIVERY"
+    )
+    assert result == 2125.0
