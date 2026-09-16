@@ -8,7 +8,7 @@
 pipenv install --dev
 ```
 
-Запустить тесты:
+### Запустить тесты:
 
 ```
 pipenv run pytest
@@ -27,7 +27,7 @@ pipenv run pytest -v
 pipenv install --dev
 ```
 
-Запустить black в режиме проверки:
+### Запустить black в режиме проверки:
 
 Для текущей директории:
 ```
@@ -39,16 +39,16 @@ pipenv run black --check .
 pipenv run black --check {путь_к_файлу}
 ``` 
 
-Запустить black в режиме форматирования:
+### Запустить black в режиме форматирования:
 
 Для текущей директории:
 ```
-pipenv run black --check .
+pipenv run black .
 ``` 
 
 Для отдельного файла:
 ```
-pipenv run black --check {путь_к_файлу}
+pipenv run black {путь_к_файлу}
 ``` 
 
 
@@ -60,14 +60,29 @@ pipenv run black --check {путь_к_файлу}
 pipenv install --dev
 ```
 
-Запустить flake8:
+### Запустить flake8:
 
 Для текущей директории:
 ```
-pipenv run black --check .
+pipenv run flake8 .
 ``` 
 
 Для отдельного файла:
 ```
-pipenv run black --check {путь_к_файлу}
+pipenv run flake8 {путь_к_файлу}
+``` 
+
+## Запуск статического анализатора типов (mypy)
+
+Установить зависимости (mypy из dev):
+
+```
+pipenv install --dev
+```
+
+### Запустить mypy:
+
+Для отдельного файла:
+```
+pipenv run mypy {путь_к_файлу}
 ``` 

@@ -1,7 +1,20 @@
 import datetime
+from typing import Optional, TypedDict
+
+class User(TypedDict):
+    name: str
+    registered_years: int
+    is_vip: bool
+
+class Item(TypedDict):
+    id: int
+    price: int
+    category: str
+    qty: int
+
 
 # Имитация базы данных в памяти
-USERS_DB = {
+USERS_DB: dict[int, User] = {
     1: {"name": "Иван", "registered_years": 3, "is_vip": True},
     2: {"name": "Ольга", "registered_years": 1, "is_vip": False},
     3: {"name": "Иван", "registered_years": 2, "is_vip": True},
@@ -13,19 +26,21 @@ USERS_DB = {
 }
 
 
-def calculate_order_total(user_id, items, discount_code=None):
+def calculate_order_total(user_id: int, items: list[Item], discount_code: Optional[str] = None) -> float:
     """
     items: список словарей [{"id": 1, "price": 100,
     "category": "electronics", "qty": 2}]
     """
-    user = USERS_DB.get(user_id)
+    user: User | None = USERS_DB.get(user_id)
     if not user:
         raise ValueError("User not found")
 
-    total = 0
+    total: float = 0
+
+    item:  Item
     for item in items:
         # Считаем базовую стоимость товара
-        item_total = item["price"] * item["qty"]
+        item_total: float = item["price"] * item["qty"]
 
         # Легаси-правило 1:
         # скидка на электронику 5%, если куплено больше 1 штуки
@@ -47,7 +62,7 @@ def calculate_order_total(user_id, items, discount_code=None):
     # Старая кривая логика промокодов
     if discount_code == "NEWYEAR2025":
         # Промокод работает только в декабре и январе (захардкожено)
-        now = datetime.datetime.now()
+        now: datetime.datetime = datetime.datetime.now()
         if now.month == 12 or now.month == 1:
             total -= 500  # Скидка 500 рублей
     elif discount_code == "SUMMER":
