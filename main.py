@@ -4,6 +4,12 @@ import datetime
 USERS_DB = {
     1: {"name": "Иван", "registered_years": 3, "is_vip": True},
     2: {"name": "Ольга", "registered_years": 1, "is_vip": False},
+    3: {"name": "Иван", "registered_years": 2, "is_vip": True},
+    4: {"name": "Ольга", "registered_years": 2, "is_vip": False},
+    5: {"name": "Иван", "registered_years": 3, "is_vip": True},
+    6: {"name": "Ольга", "registered_years": 3, "is_vip": False},
+    7: {"name": "Иван", "registered_years": 4, "is_vip": True},
+    8: {"name": "Ольга", "registered_years": 4, "is_vip": False},
     }
 
 
