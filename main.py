@@ -10,7 +10,7 @@ USERS_DB = {
     6: {"name": "Ольга", "registered_years": 3, "is_vip": False},
     7: {"name": "Иван", "registered_years": 4, "is_vip": True},
     8: {"name": "Ольга", "registered_years": 4, "is_vip": False},
-    }
+}
 
 
 def calculate_order_total(user_id, items, discount_code=None):
@@ -21,13 +21,14 @@ def calculate_order_total(user_id, items, discount_code=None):
     user = USERS_DB.get(user_id)
     if not user:
         raise ValueError("User not found")
-    
+
     total = 0
     for item in items:
         # Считаем базовую стоимость товара
         item_total = item["price"] * item["qty"]
 
-        # Легаси-правило 1: скидка на электронику 5%, если куплено больше 1 штуки
+        # Легаси-правило 1:
+        # скидка на электронику 5%, если куплено больше 1 штуки
         if item["category"] == "electronics" and item["qty"] > 1:
             item_total = item_total * 0.95
 
@@ -39,18 +40,18 @@ def calculate_order_total(user_id, items, discount_code=None):
 
     # Применение скидок пользователя
     if user["is_vip"]:
-        total -= total * 0.10 # VIP скидка 10%
+        total -= total * 0.10  # VIP скидка 10%
     elif user["registered_years"] >= 3:
-        total -= total * 0.05 # Скидка за лояльность 5%
+        total -= total * 0.05  # Скидка за лояльность 5%
 
     # Старая кривая логика промокодов
     if discount_code == "NEWYEAR2025":
-    # Промокод работает только в декабре и январе (захардкожено)
+        # Промокод работает только в декабре и январе (захардкожено)
         now = datetime.datetime.now()
         if now.month == 12 or now.month == 1:
-            total -= 500 # Скидка 500 рублей
+            total -= 500  # Скидка 500 рублей
     elif discount_code == "SUMMER":
-        total = total * 0.85 # Скидка 15%
+        total = total * 0.85  # Скидка 15%
 
     if total < 0:
         total = 0

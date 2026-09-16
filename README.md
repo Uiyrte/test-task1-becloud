@@ -2,7 +2,7 @@
 
 ## Запуск тестов
 
-Установить зависимости (включая pytest из dev):
+Установить зависимости (pytest из dev):
 
 ```
 pipenv install --dev
@@ -17,4 +17,57 @@ pipenv run pytest
 
 ```
 pipenv run pytest -v
+``` 
+
+## Запуск форматтера (black)
+
+Установить зависимости (black из dev):
+
+```
+pipenv install --dev
+```
+
+Запустить black в режиме проверки:
+
+Для текущей директории:
+```
+pipenv run black --check .
+``` 
+
+Для отдельного файла:
+```
+pipenv run black --check {путь_к_файлу}
+``` 
+
+Запустить black в режиме форматирования:
+
+Для текущей директории:
+```
+pipenv run black --check .
+``` 
+
+Для отдельного файла:
+```
+pipenv run black --check {путь_к_файлу}
+``` 
+
+
+## Запуск линтера (flake8)
+
+Установить зависимости (flake8 из dev):
+
+```
+pipenv install --dev
+```
+
+Запустить flake8:
+
+Для текущей директории:
+```
+pipenv run black --check .
+``` 
+
+Для отдельного файла:
+```
+pipenv run black --check {путь_к_файлу}
 ``` 
