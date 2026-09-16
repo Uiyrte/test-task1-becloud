@@ -1,8 +1,6 @@
 import datetime
 from abc import ABC, abstractmethod
 
-from src.models import Item
-
 
 class DiscountCodeSale(ABC):
     @abstractmethod

@@ -11,19 +11,19 @@ class CategoryItemSale(ABC):
 
 class ElectronicsItemSale(CategoryItemSale):
     def calculate_item_cost(self, item: Item) -> float:
-        if item["qty"] > 1:
-            return item["price"] * item["qty"] * 0.95
-        return item["price"] * item["qty"]
+        if item.qty > 1:
+            return item.price * item.qty * 0.95
+        return item.price * item.qty
 
 
 class BooksItemSale(CategoryItemSale):
     def calculate_item_cost(self, item: Item) -> float:
-        return item["price"] * item["qty"] * 0.9
+        return item.price * item.qty * 0.9
 
 
 class DefaultItemSale(CategoryItemSale):
     def calculate_item_cost(self, item: Item) -> float:
-        return item["price"] * item["qty"]
+        return item.price * item.qty
 
 
 ITEM_SALE_REGISTRY: dict[str, CategoryItemSale] = {

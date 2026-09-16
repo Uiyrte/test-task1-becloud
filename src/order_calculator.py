@@ -22,7 +22,7 @@ def calculate_order_total(
     for item in items:
         # Применение скидок, соответствующих категории, количетсву и т.п.
         item_sale_strategy: CategoryItemSale = get_item_sale_strategy(
-            item["category"]
+            item.category
         )
         total += item_sale_strategy.calculate_item_cost(item)
 
