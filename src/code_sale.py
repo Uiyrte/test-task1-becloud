@@ -21,11 +21,15 @@ class DiscountCodeSale(ABC):
     def is_available(self) -> bool:
         pass
 
-    @abstractmethod
     def calculate_total_cost(
         self, total: float, user: User, items: list[Item]
     ) -> float:
-        pass
+        return total
+
+    def calculate_delivery_cost(
+        self, delivery_cost: float, total: float, user: User, items: list[Item]
+    ) -> float:
+        return delivery_cost
 
 
 class FixedCodeSale(DiscountCodeSale):
@@ -59,15 +63,12 @@ class PercentCodeSale(DiscountCodeSale):
     def calculate_total_cost(
         self, total: float, user: User, items: list[Item]
     ) -> float:
-        if self.is_available():
-            return total * (1 - self.percent / 100)
-        return total
+        return total * (1 - self.percent / 100)
 
 
-class DeliveryCodeSale(DiscountCodeSale):
-    def __init__(self, limit: float, del_cost: float):
+class FreeDeliveryCodeSale(DiscountCodeSale):
+    def __init__(self, limit: float):
         self.limit = limit
-        self.del_cost = del_cost
 
     @property
     def get_code_type(self) -> CodeTypes:
@@ -76,12 +77,12 @@ class DeliveryCodeSale(DiscountCodeSale):
     def is_available(self) -> bool:
         return True
 
-    def calculate_total_cost(
-        self, total: float, user: User, items: list[Item]
+    def calculate_delivery_cost(
+        self, delivery_cost: float, total: float, user: User, items: list[Item]
     ) -> float:
-        if total <= self.limit:
-            return total + self.del_cost
-        return total
+        if total > self.limit:
+            return 0
+        return delivery_cost
 
 
 class NewYearCodeDecorator(DiscountCodeSale):
@@ -104,25 +105,39 @@ class NewYearCodeDecorator(DiscountCodeSale):
             return self.wrapped.calculate_total_cost(total, user, items)
         return total
 
+    def calculate_delivery_cost(
+        self, delivery_cost: float, total: float, user: User, items: list[Item]
+    ) -> float:
+        if self.is_available():
+            return self.wrapped.calculate_delivery_cost(
+                delivery_cost, total, user, items
+            )
+        return delivery_cost
+
 
 CODE_SALE_REGISTRY: dict[str, DiscountCodeSale] = {
     "NEWYEAR2025": NewYearCodeDecorator(FixedCodeSale(500), {12, 1}),
     "SUMMER": PercentCodeSale(15),
-    "FREEDELIVERY": DeliveryCodeSale(limit=2000, del_cost=300),
+    "FREEDELIVERY": FreeDeliveryCodeSale(limit=2000),
 }
 
 
-def apply_code_sales(
-    total: float, codes: list[str], user: User, items: list[Item]
-) -> float:
+def get_code_sales(codes: list[str]) -> list[DiscountCodeSale]:
     sale_codes: list[DiscountCodeSale] = [
         CODE_SALE_REGISTRY[code]
-        for code in codes
+        for code in dict.fromkeys(codes)
         if code in CODE_SALE_REGISTRY
     ]
-    sorted_codes = sorted(sale_codes, key=lambda p: p.get_code_type)
+    return sorted(sale_codes, key=lambda p: p.get_code_type)
 
-    for code in sorted_codes:
+
+def apply_code_sales(
+    total: float,
+    sale_codes: list[DiscountCodeSale],
+    user: User,
+    items: list[Item],
+) -> float:
+    for code in sale_codes:
         total = code.calculate_total_cost(total, user, items)
 
     return max(total, 0)

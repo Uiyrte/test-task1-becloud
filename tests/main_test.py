@@ -2,9 +2,16 @@ from datetime import datetime
 
 import pytest
 
+from src.code_sale import (
+    CODE_SALE_REGISTRY,
+    FreeDeliveryCodeSale,
+    NewYearCodeDecorator,
+)
 from src.models import Item
 from src.order_calculator import calculate_order_total
 from src.users_repository import USERS_DB
+
+DELIVERY_COST = 300
 
 
 def make_fake_date(month):
@@ -68,7 +75,9 @@ def test_zero_items(user_id, items, discount_code):
     ],
 )
 def test_base_total(user_id, items, discount_code):
-    assert calculate_order_total(user_id, items, discount_code) == 200
+    assert calculate_order_total(user_id, items, discount_code) == (
+        200 + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -124,7 +133,10 @@ def test_base_total(user_id, items, discount_code):
     ],
 )
 def test_5_percents_sale_electronics(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -146,7 +158,10 @@ def test_5_percents_sale_electronics(user_id, items, discount_code, result):
     ],
 )
 def test_10_percents_sale_books(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -163,7 +178,10 @@ def test_10_percents_sale_books(user_id, items, discount_code, result):
     ],
 )
 def test_vip_sale(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -180,7 +198,10 @@ def test_vip_sale(user_id, items, discount_code, result):
     ],
 )
 def test_more_equal_3_years(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -250,7 +271,10 @@ def test_code_new_year(
     monkeypatch.setattr(
         "src.code_sale.datetime.datetime", make_fake_date(month)
     )
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -263,20 +287,33 @@ def test_code_new_year(
     ],
 )
 def test_code_summer(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
-    ["user_id", "items", "discount_code"],
+    ["user_id", "items", "discount_code", "result"],
     [
-        [1, [Item(id=1, price=500, category="base", qty=-1)], "SOMECODE"],
-        [2, [Item(id=1, price=500, category="base", qty=-1)], "SOMECODE"],
-        [1, [Item(id=1, price=-500, category="base", qty=1)], "SOMECODE"],
-        [2, [Item(id=1, price=-500, category="base", qty=1)], "SOMECODE"],
+        [1, [Item(id=1, price=500, category="base", qty=-1)], "SOMECODE", 0],
+        [2, [Item(id=1, price=500, category="base", qty=-1)], "SOMECODE", 0],
+        [
+            1,
+            [Item(id=1, price=-500, category="base", qty=1)],
+            "SOMECODE",
+            DELIVERY_COST,
+        ],
+        [
+            2,
+            [Item(id=1, price=-500, category="base", qty=1)],
+            "SOMECODE",
+            DELIVERY_COST,
+        ],
     ],
 )
-def test_negative_total(user_id, items, discount_code):
-    assert calculate_order_total(user_id, items, discount_code) == 0
+def test_negative_total(user_id, items, discount_code, result):
+    assert calculate_order_total(user_id, items, discount_code) == result
 
 
 @pytest.mark.parametrize(
@@ -292,7 +329,9 @@ def test_negative_total_after_newyear_discount(
     monkeypatch.setattr(
         "src.code_sale.datetime.datetime", make_fake_date(month)
     )
-    assert calculate_order_total(user_id, items, discount_code) == 0
+    assert calculate_order_total(user_id, items, discount_code) == (
+        DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -344,7 +383,10 @@ def test_negative_total_after_newyear_discount(
     ],
 )
 def test_diff_sale(user_id, items, discount_code, result):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -470,7 +512,10 @@ def test_diff_sale_new_year(
     monkeypatch.setattr(
         "src.code_sale.datetime.datetime", make_fake_date(month)
     )
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -490,7 +535,10 @@ def test_diff_sale_new_year(
 def test_summer_discount_applied_once_per_order(
     user_id, items, discount_code, result
 ):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -514,7 +562,10 @@ def test_newyear_discount_applied_once_per_order(
     monkeypatch.setattr(
         "src.code_sale.datetime.datetime", make_fake_date(month)
     )
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -534,7 +585,10 @@ def test_newyear_discount_applied_once_per_order(
 def test_mixed_categories_multi_item_order(
     user_id, items, discount_code, result
 ):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -555,7 +609,10 @@ def test_mixed_categories_multi_item_order(
 def test_zero_price_or_qty_items_do_not_contribute(
     user_id, items, discount_code, result
 ):
-    assert calculate_order_total(user_id, items, discount_code) == result
+    assert (
+        calculate_order_total(user_id, items, discount_code)
+        == result + DELIVERY_COST
+    )
 
 
 @pytest.mark.parametrize(
@@ -585,3 +642,65 @@ def test_delivery_code_applied_after_fixed_and_percent_codes(monkeypatch):
         user_id, items, "NEWYEAR2025", "SUMMER", "FREEDELIVERY"
     )
     assert result == 2125.0
+
+
+@pytest.mark.parametrize(
+    ["user_id", "items", "result"],
+    [
+        [2, [Item(id=1, price=1500, category="base", qty=1)], 1800],
+        [2, [Item(id=1, price=2500, category="base", qty=1)], 2800],
+    ],
+)
+def test_delivery_charged_without_codes(user_id, items, result):
+    assert calculate_order_total(user_id, items) == result
+
+
+def test_free_delivery_code_order_does_not_matter():
+    user_id = 2
+    items = [Item(id=1, price=3000, category="base", qty=1)]
+    result = calculate_order_total(user_id, items, "FREEDELIVERY", "SUMMER")
+    assert result == 2550.0
+
+
+def test_free_delivery_code_uses_total_after_discounts():
+    user_id = 2
+    items = [Item(id=1, price=2200, category="base", qty=1)]
+    result = calculate_order_total(user_id, items, "SUMMER", "FREEDELIVERY")
+    assert result == 1870.0 + DELIVERY_COST
+
+
+@pytest.mark.parametrize(["month", "result"], [[12, 2500], [6, 2800]])
+def test_seasonal_free_delivery_decorator(monkeypatch, month, result):
+    monkeypatch.setattr(
+        "src.code_sale.datetime.datetime", make_fake_date(month)
+    )
+    monkeypatch.setitem(
+        CODE_SALE_REGISTRY,
+        "WINTERDELIVERY",
+        NewYearCodeDecorator(FreeDeliveryCodeSale(limit=2000), {12, 1}),
+    )
+    items = [Item(id=1, price=2500, category="base", qty=1)]
+    assert calculate_order_total(2, items, "WINTERDELIVERY") == result
+
+
+@pytest.mark.parametrize(
+    ["codes", "result"],
+    [
+        [["SUMMER", "SUMMER"], 850 + DELIVERY_COST],
+        [["SUMMER", "FREEDELIVERY", "SUMMER"], 850 + DELIVERY_COST],
+    ],
+)
+def test_same_code_applied_once(codes, result):
+    items = [Item(id=1, price=1000, category="base", qty=1)]
+    assert calculate_order_total(2, items, *codes) == result
+
+
+@pytest.mark.parametrize(
+    ["items", "result"],
+    [
+        [[Item(id=1, price=0, category="base", qty=1)], DELIVERY_COST],
+        [[Item(id=1, price=0, category="base", qty=0)], 0],
+    ],
+)
+def test_delivery_charged_for_free_items(items, result):
+    assert calculate_order_total(2, items) == result

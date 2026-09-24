@@ -1,4 +1,5 @@
-from src.code_sale import apply_code_sales
+from src.code_sale import DiscountCodeSale, apply_code_sales, get_code_sales
+from src.delivery import calculate_delivery_cost
 from src.item_sale import CategoryItemSale, get_item_sale_strategy
 from src.models import Item, User
 from src.person_sale import PERSON_SALE_REGISTRY
@@ -24,6 +25,8 @@ def calculate_order_total(
         )
         total += item_sale_strategy.calculate_item_cost(item)
 
+    has_goods: bool = any(item.qty > 0 for item in items)
+
     # Применение скидок пользователя
     for person_sale in PERSON_SALE_REGISTRY:
         if person_sale.is_available(user):
@@ -31,9 +34,10 @@ def calculate_order_total(
             break
 
     # Применение скидок промокодов
-    total = apply_code_sales(total, list(discount_codes), user, items)
+    sale_codes: list[DiscountCodeSale] = get_code_sales(list(discount_codes))
+    total = apply_code_sales(total, sale_codes, user, items)
 
-    if total < 0:
-        total = 0
+    if has_goods:
+        total += calculate_delivery_cost(total, sale_codes, user, items)
 
     return total
